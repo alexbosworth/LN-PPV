@@ -61,5 +61,20 @@ This feature is of course not always wanted (I'd argue that it could be consider
 ### Read confirmation without additional communication
 This one is pretty straight-forward. By checking if the invoice corresponding to the user/request has been fulfilled (if the preimage has been revealed) content provider can determine wheter the other party has read the encrypted content and respond to next request from the same user accordingly.
 
+## Proof-of-Concept
+Attached in this repository is a simple Python script that allows you to create and decrypt the content. To test it out for yourself:
+* Edit the `config.py` file supplying it with a path to admin macaroon and cert file
+
+To create an encrypted packet place your content in a separate file and run:
+```console
+foo@bar:~$ python3 main.py -c <FILE_PATH>
+```
+
+Similarly, to decrypt the content place it in a separate file and run:
+```console
+foo@bar:~$ python3 main.py -d <FILE_PATH>
+```
+Make sure you've paid the invoice to successfully decrypt the content.
+
 ## License
 MIT
