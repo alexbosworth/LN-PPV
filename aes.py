@@ -27,7 +27,3 @@ class AESCipher(object):
     def _unpad(s):
         return s[:-ord(s[len(s)-1:])]
 
-
-~                                                                                                                                                     
-~                                                                                                                                                     
-~                 
