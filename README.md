@@ -57,6 +57,8 @@ There's no need for additional server-client communication (apart from payment s
 
 Additionaly (depending on the usecase and security concerns) content encryption key can be the same as preimage. This trick allows for the payer to "leak" the decryption key to other nodes along the route path.
 
+**Important: while this solution uses encryption/decryption in many of its steps, it DOESN'T actually provide any security to the data itself. After all, anyone who can obtain the packet and pay the invoice has the ability to read the contents. If you want to achieve data security, use it in conjunction with PGP, TLS, TOR etc.**
+
 ## Possible usage examples
 
 ### Pay-per-Read Emails
