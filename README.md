@@ -48,10 +48,10 @@ nl9rhrr86999nal563p84szcyhr57kn94gygssq4k30zv
 ----------------------- LN-PPV-END ------------------------
 ```
 
-Next, a piece of software on the side of the client (e.g. browser extension) would find the invoice block and after successful payment decrypt (obtaing a preimage) the user is able to:
-1. Obtain the data decryption key by decrypt the Description field using preimage as a key
+Next, a piece of software on the side of the client (e.g. browser extension) would find the invoice block and after successful payment (obtaing a preimage) the user is able to:
+1. Obtain the data decryption key by decrypting the Description field using preimage as a key
 2. Decrypt the data section of the "packet"
-3. Replace the "packet" with the decrypted content
+3. Replace the displayed "packet" with decrypted content
 
 There's no need for additional server-client communication (apart from payment settlement). 
 
