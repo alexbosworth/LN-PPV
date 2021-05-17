@@ -27,27 +27,27 @@ Additionaly (depending on the usecase and security concerns) content encryption 
 
 ## Possible usage examples
 
-### Email encryption
-Javascript is not supported inside emails. In it's current implementation, it's not possible to create a paywalled email, where the recipients need to pay for a privilege of reading the content. Using my proposed solution, paying the invoice (and encrypting the email) would look very similar to PGP extensions built in email clients (e.g. Thunderbird).
+### Pay-per-Read Emails
+Javascript is not supported inside emails. In it's current implementation, it's not possible to create a paywalled email, where the recipients need to pay for a privilege of reading the content. Using my proposed solution, paying the invoice (and encrypting the email) would look very similar to how PGP extensions built in email clients work (e.g. Thunderbird).
 
 ### Micropayments inside Tor hidden services
 Since most of Tor hidden services don't use Javascript, there's no easy way to implement paywalled content without the need of constant refreshing by the user.
-However, using this solution hidden services can serve PPV content without the need for any JS code. However, this would require for user to install an additional browser extension that reads the contents of the webpage and detects lightning invoices. While it might sound like a security risk (in the context of using Tor), it's much safer to install a possibly open-source and audited web browser extension rather than allowing for an arbitrary JS code execution. 
-(please note that Tor browser comes with few addons already pre-installed like HTTPS Everywhere and  NoScript)
+However, using this solution hidden services can serve PPV content without the need for any JS code. Please note that this would require for user to install an additional browser extension that reads the contents of the webpage and detects lightning invoices. While it might sound like a security risk (in the context of using Tor), it's much safer to install a possibly open-source and audited web browser extension rather than allowing for an arbitrary JS code execution. 
+(also Tor browser comes with few extensions already pre-installed like HTTPS Everywhere and NoScript)
 
 ## Additionaly, all of examples above can have following properties:
 ### Time sensitive content
-By changing the HTLC expiry field we can make the content time-sensitive while also handing the content (in an encrypted form) to another party. If the HTLC expires, the user can no longer recieve the payment Preimage rendering the encrypted content useless.
+By changing the HTLC expiry field we can make the content time-sensitive while also handing the content (in an encrypted form) to another party. If the HTLC expires, the user can no longer recieve the payment Preimage rendering the encrypted content useless. Content provider doesn't even have to monitor whether the payment has been made.
 What's also cool is the fact that the expiry time selection can be relatively long (max 1 year) or short (min 1 sec) depending on the usecase.
 
 ### Read privilege only for the quickest buyer
 Let's say you want to share something publicly on Twitter but make it visible only to one person in a first come first serve fashion. Well, after the invoice has been paid, it becomes invalid for the rest. 
-Note: some nodes allow for the invoice to be paid multiple times so you need to check the configuration on your end.
+**Note: some nodes allow for the invoice to be paid multiple times so you need to check the configuration on your end.**
 
 ### Decryption sharing
 By using the preimage as the decryption key, payer can (willingly or not - depending on the implementation and usecase) enable the routing nodes to also decrypt the content.
 
-The usability of said property is especially visible in the "Email encryption" usage example. Let's say Alice sends the same email to both Bob, Carol and Dolory. If the recipients know each other, Bob could possibly construct a payment where the routing nodes are Carol and Dolory. In that case Bob is essentially allowing borth Dolory and Carol to read the contents without paying anything.
+The usability of said property is especially visible in the "Pay-per-Read Email" usage example. Let's say Alice sends the same email to both Bob, Carol and Dolory. If the recipients know each other, Bob could possibly construct a payment where the routing nodes are Carol and Dolory. In that case Bob is essentially allowing borth Dolory and Carol to read the contents without paying anything.
 ```
                 Alice                       |                   HTLC
                   ↓                         |               
@@ -55,7 +55,7 @@ The usability of said property is especially visible in the "Email encryption" u
         | <ln-invoice>          |           |
         | <encrypted data>      |           |
 ```
-This feature is of course not always wanted (I'd argue that it could be considered malicious in most of the cases). The simple and easy solution is for the content provider to use a separate encryption key for the data, encrypt it with the preimage and put it in the 
+This feature is of course not always wanted (I'd argue that it could be considered malicious in most of the cases). The simple and easy solution is for the content provider to use a separate encryption key for the data, encrypt it with the preimage and put it in the payment description field.
 > Memo = Enc(DataKey, Preimage)
 
 ### Read confirmation without additional communication
