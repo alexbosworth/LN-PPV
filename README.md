@@ -91,6 +91,9 @@ The usability of said property is especially visible in the "Pay-per-Read Email"
 ```
 This feature is of course not always wanted (I'd argue that it could be considered malicious in most of the cases). 
 
+### Data buffering
+Don't want to keep track of paid invoices? No problem, you can generate many separate invoices (everyone with a different data and key attached) and send it to the user. Now he can pay them at the rate he sees fit and the merchant doesn't even have to interact with this client anymore.
+
 ### Read confirmation without additional communication
 This one is pretty straight-forward. By checking if the invoice corresponding to the user/request has been fulfilled (if the preimage has been revealed) content provider can determine wheter the other party has read the encrypted content and respond to next request from the same user accordingly.
 
