@@ -2,8 +2,8 @@
 Offline Lightning Network PPV
 
 Usage:
-  main.py -c -f <FILE_PATH> - creates an PPV invoice and encrypts the content stored in <FILE_PATH>
-  main.py -d -f <FILE_PATH> - decrypts the PPV packet stored in <FILE_PATH>
+  main.py -c <FILE_PATH> - creates an PPV invoice and encrypts the content stored in <FILE_PATH>
+  main.py -d <FILE_PATH> - decrypts the PPV packet stored in <FILE_PATH>
 """
 
 import codecs, grpc, os, sys, textwrap
@@ -18,6 +18,10 @@ cert = open(CERT_PATH, 'rb').read()
 ssl_creds = grpc.ssl_channel_credentials(cert)
 channel = grpc.secure_channel('localhost:10009', ssl_creds)
 stub = rpcstub.LightningStub(channel)
+
+packet_start = '--------------- LN-PPV-START ---------------'
+middle_line = '--------------------------------------------'
+packet_end = '--------------- LN-PPV-END ---------------'
 
 def createInvoice(amount, data_key, expiry=3600):
     preimage = os.urandom(32)
@@ -37,12 +41,17 @@ def decodeInvoice(invoice):
         pay_req=invoice,
     )
     response = stub.DecodePayReq(request, metadata=[('macaroon', macaroon)])
-    print(response)
+    description = response.description
+    request = lnrpc.ListPaymentsRequest(
+        include_incomplete=False,
+        reversed=True
+    )
+    response = stub.ListPayments(request, metadata=[('macaroon', macaroon)])
+    for payment in response.payments:
+        if payment.payment_request == invoice:
+            return payment.payment_preimage, description 
 
 
-packet_start = '--------------- LN-PPV-START ---------------'
-middle_line = '--------------------------------------------'
-packet_end = '--------------- LN-PPV-END ---------------'
 
 def parse_packet(data):
     invoice = data[data.find(packet_start)+len(packet_start):data.find(middle_line)]
@@ -58,9 +67,8 @@ def create_packet(invoice, enc_data):
     print(packet_end)
 
 if __name__ == "__main__":
-    print(sys.argv)
     mode = sys.argv[1]
-    file_path = sys.argv[3]
+    file_path = sys.argv[2]
     if mode == '-c':
         data = open(file_path).read()
         amount = int(input("How much should the invoice cost (sats): "))
@@ -72,9 +80,7 @@ if __name__ == "__main__":
     elif mode == '-d':
         data = open(file_path).read()
         invoice, data_enc = parse_packet(data)
-        print(invoice, ' ', data_enc)
-        decodeInvoice(invoice)
-        pass
-    else:
-        print("Could not find proper arguments")
-
+        preimage, data_key_enc = decodeInvoice(invoice)
+        data_key = AESCipher( preimage ).decrypt(data_key_enc)
+        data = AESCipher( data_key).decrypt(bytearray.fromhex(data_enc))
+        print(data)
