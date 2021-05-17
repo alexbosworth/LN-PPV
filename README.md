@@ -13,7 +13,7 @@ This PoC shows a way to statically serve PPV content by leveraging Lightning Net
 * Expiration time
 * Description
 
-Instead of sending the data partially, we can send the content in full but keep some parts encrypted with data key encrypted with by the preimage.
+Instead of sending the data partially, we can send the content in full but keep some parts encrypted with data key encrypted by the preimage.
 
 > Description = AES(Key, Preimage)
 
@@ -48,7 +48,12 @@ nl9rhrr86999nal563p84szcyhr57kn94gygssq4k30zv
 ----------------------- LN-PPV-END ------------------------
 ```
 
-Next, a piece of software on the side of the client (e.g. browser extension) would find the invoice block and after successful payment decrypt the content and display it to the user. There's no need for additional server-client communication (apart from payment settlement). 
+Next, a piece of software on the side of the client (e.g. browser extension) would find the invoice block and after successful payment decrypt (obtaing a preimage) the user is able to:
+1. Obtain the data decryption key by decrypt the Description field using preimage as a key
+2. Decrypt the data section of the "packet"
+3. Replace the "packet" with the decrypted content
+
+There's no need for additional server-client communication (apart from payment settlement). 
 
 Additionaly (depending on the usecase and security concerns) content encryption key can be the same as preimage. This trick allows for the payer to "leak" the decryption key to other nodes along the route path.
 
