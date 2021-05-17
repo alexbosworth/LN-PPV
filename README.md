@@ -1,5 +1,5 @@
 # Pay-per-View using the Lightning Network
-Proof of Concept of a Pay-per-View content management solution using the [Lightning Network](https://lightning.network/).
+Proof of Concept of a static Pay-per-View content management solution using the [Lightning Network](https://lightning.network/).
 
 ## Current PPV implementations using the Lightning Network
 Currently, most services (e.g. [yalls](https://yalls.org/)) serve only a portion of the data and use websockets to keep an open connection with the client. Only after the server confirms that the invoice has been paid, it sends the rest of the data.
@@ -13,17 +13,44 @@ This PoC shows a way to statically serve PPV content by leveraging Lightning Net
 * Expiration time
 * Description
 
-Instead of sending the data partially, we can send the content in full but keep some parts encrypted with preimage of the HTLC as a key. A sample encrypted message could look like this:
+Instead of sending the data partially, we can send the content in full but keep some parts encrypted with data key encrypted with by the preimage.
+
+> Description = AES(Key, Preimage)
+
+A sample encrypted message could look like this:
 ```
---------- LN-PPV-START ---------
-    <lnd invoice>
--------------------------------
-    <encrypted content>
---------- LN-PPV-END ----------
+----------------------- LN-PPV-START -----------------------
+lntb100n1ps2y4gvpp5syqxv44j5hjsl8gsrwjrhkamnglf7degutpkmc4xc
+7dwfvk555vqdxdtp4rv7n8x3mrsmp0d3m8vvt02fujk7rcfs4kwemy2pf5v3
+64vft4snmfvcehwvekxf49zc2tx4grxuzxwpp556p4far5v630vexkzm2d24
+dx2nmwfdp9zemwxdzy2k359arnv6zewce5vwzs2fgryvngdd6xztmtxap4xv
+fnve88gurw29x4jd3523e8qsmgdapy2mmftye9gcqzpgxqrrsssp5f9xl74j
+v44x05dqtr7dyltq8mkl7hhnfugtj43h2yts25v3wqazq9q8zqqyssql6228
+y08yxdncy80kt838p0m6n2g57n0mqvvc67frlqh4yfyypnrsd6usaqeyn4pl
+nl9rhrr86999nal563p84szcyhr57kn94gygssq4k30zv
+------------------------------------------------------------
+5a6b735279726c4b39496b6b676577614b4b67386c7563717042434d6e30
+6a414a746d39674564654f3661384e312f616e6866465437724372644b6b
+2b4b7a3577544c6b6d2b432b644b704f4b42757779377337553543636f50
+3851746644366e7252492b6b7638724858765a6b594b5646533476595532
+6f6c48754436747131494b572f7a534d6679546d694d6169775956754161
+32565059745a4a75474d384e7877476d4f497a4d624b5377385555307238
+536232642b7a6a6c5737456e6e4e34346b6a6e68672f6245795545546344
+                          (...)
+42613536527738523448305157552b6b766b63417157325543454d797975
+495437546866332f30463271446c37337251496546757a52557534686868
+75596b755256757367584836715656305a33637949795961302b365a3333
+396e6b6a722f5777376c365470556937613030477370306e53654b31622b
+2f58304d52756d7268704b634d433546653370783173384b446961472f66
+39664151624f3642382b446c456c2b584374787832585262776971774748
+753436347479554e6b597776334b646b526d6b3278794d665567376f6438
+767257514e356c66706167447462304c4f38682b35424146434d62563357
+----------------------- LN-PPV-END ------------------------
 ```
+
 Next, a piece of software on the side of the client (e.g. browser extension) would find the invoice block and after successful payment decrypt the content and display it to the user. There's no need for additional server-client communication (apart from payment settlement). 
 
-Additionaly (depending on the usecase and security concerns) content encryption key can and oftenly should be different than the preimage and stored encrypted with the preimage as key in the payment description. This allows for the content encryption key to be much longer than 32-byte long preimage. This is crucially important if the content is served via an uprotected channel, where a routing node could also have the ability to decrypt the content.
+Additionaly (depending on the usecase and security concerns) content encryption key can be the same as preimage. This trick allows for the payer to "leak" the decryption key to other nodes along the route path.
 
 ## Possible usage examples
 
@@ -55,8 +82,7 @@ The usability of said property is especially visible in the "Pay-per-Read Email"
         | <ln-invoice>          |           |
         | <encrypted data>      |           |
 ```
-This feature is of course not always wanted (I'd argue that it could be considered malicious in most of the cases). The simple and easy solution is for the content provider to use a separate encryption key for the data, encrypt it with the preimage and put it in the payment description field.
-> Memo = Enc(DataKey, Preimage)
+This feature is of course not always wanted (I'd argue that it could be considered malicious in most of the cases). 
 
 ### Read confirmation without additional communication
 This one is pretty straight-forward. By checking if the invoice corresponding to the user/request has been fulfilled (if the preimage has been revealed) content provider can determine wheter the other party has read the encrypted content and respond to next request from the same user accordingly.
